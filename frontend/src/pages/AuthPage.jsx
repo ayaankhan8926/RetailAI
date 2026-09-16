@@ -20,7 +20,7 @@ function AuthPage({ onAdminLogin, onEmployeeLogin }) {
     e.preventDefault()
     setError('')
     try {
-      const url = role === 'admin' ? 'http://127.0.0.1:5000/admin/login' : 'http://127.0.0.1:5000/employee/login'
+      const url = role === 'admin' ? 'https://retailai-backend-0onv.onrender.com/admin/login' : 'https://retailai-backend-0onv.onrender.com/employee/login'
       const response = await axios.post(url, { email: email, password: password })
       if (role === 'admin') {
         localStorage.setItem('admin', JSON.stringify(response.data))
@@ -40,7 +40,7 @@ function AuthPage({ onAdminLogin, onEmployeeLogin }) {
     e.preventDefault()
     setError('')
     try {
-      const response = await axios.post('http://127.0.0.1:5000/shop/signup', {
+      const response = await axios.post('https://retailai-backend-0onv.onrender.com/shop/signup', {
         shop_name: shopName,
         owner_name: ownerName,
         owner_email: email,

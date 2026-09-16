@@ -27,12 +27,12 @@ function Billing() {
 
   useEffect(() => {
     const shopId = getShopId()
-    axios.get('http://127.0.0.1:5000/customers?shop_id=' + shopId).then(function (res) { setCustomers(res.data) })
-    axios.get('http://127.0.0.1:5000/products?shop_id=' + shopId).then(function (res) { setProducts(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/customers?shop_id=' + shopId).then(function (res) { setCustomers(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/products?shop_id=' + shopId).then(function (res) { setProducts(res.data) })
   }, [])
 
   function loadCustomers() {
-    axios.get('http://127.0.0.1:5000/customers?shop_id=' + getShopId()).then(function (res) { setCustomers(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/customers?shop_id=' + getShopId()).then(function (res) { setCustomers(res.data) })
   }
 
   async function handleAddNewCustomer() {
@@ -41,7 +41,7 @@ function Billing() {
       return
     }
     try {
-      const response = await axios.post('http://127.0.0.1:5000/customers', {
+      const response = await axios.post('https://retailai-backend-0onv.onrender.com/customers', {
         name: ncName,
         phone: ncPhone,
         email: ncEmail,
@@ -67,7 +67,7 @@ function Billing() {
     const code = barcodeInput.trim()
     if (!code) return
     try {
-      const response = await axios.get('http://127.0.0.1:5000/products/barcode/' + code)
+      const response = await axios.get('https://retailai-backend-0onv.onrender.com/products/barcode/' + code)
       const product = response.data
       const existingIndex = items.findIndex(function (item) { return item.product_id === String(product.product_id) })
       if (existingIndex !== -1) {
@@ -213,7 +213,7 @@ function Billing() {
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/bills', billData)
+      const response = await axios.post('https://retailai-backend-0onv.onrender.com/bills', billData)
       setMessage('Bill created successfully! Bill ID: ' + response.data.bill_id)
 
       const newBill = {
@@ -243,7 +243,7 @@ function Billing() {
       setCardExpiry('')
       setCardCvv('')
 
-      axios.get('http://127.0.0.1:5000/products?shop_id=' + getShopId()).then(function (res) { setProducts(res.data) })
+      axios.get('https://retailai-backend-0onv.onrender.com/products?shop_id=' + getShopId()).then(function (res) { setProducts(res.data) })
     } catch (error) {
       const errMsg = error.response && error.response.data && error.response.data.error
         ? error.response.data.error

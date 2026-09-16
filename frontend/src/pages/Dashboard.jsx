@@ -14,14 +14,14 @@ function Dashboard() {
 
   useEffect(() => {
     const shopId = getShopId()
-    axios.get('http://127.0.0.1:5000/products?shop_id=' + shopId).then(function (res) { setProducts(res.data) })
-    axios.get('http://127.0.0.1:5000/customers?shop_id=' + shopId).then(function (res) { setCustomers(res.data) })
-    axios.get('http://127.0.0.1:5000/inventory?shop_id=' + shopId).then(function (res) { setInventory(res.data) })
-    axios.get('http://127.0.0.1:5000/ai/profit-prediction?shop_id=' + shopId).then(function (res) { setProfit(res.data) })
-    axios.get('http://127.0.0.1:5000/ai/demand-prediction?shop_id=' + shopId).then(function (res) {
+    axios.get('https://retailai-backend-0onv.onrender.com/products?shop_id=' + shopId).then(function (res) { setProducts(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/customers?shop_id=' + shopId).then(function (res) { setCustomers(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/inventory?shop_id=' + shopId).then(function (res) { setInventory(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/ai/profit-prediction?shop_id=' + shopId).then(function (res) { setProfit(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/ai/demand-prediction?shop_id=' + shopId).then(function (res) {
       setDemand(Array.isArray(res.data) ? res.data : [])
     })
-    axios.get('http://127.0.0.1:5000/bills?shop_id=' + shopId).then(function (res) {
+    axios.get('https://retailai-backend-0onv.onrender.com/bills?shop_id=' + shopId).then(function (res) {
       setBills(res.data)
       const sorted = [...res.data].sort(function (a, b) { return new Date(a.bill_date) - new Date(b.bill_date) })
       const chartData = sorted.map(function (bill) {
@@ -52,12 +52,12 @@ function Dashboard() {
       return
     }
     try {
-      await axios.post('http://127.0.0.1:5000/inventory/restock', {
+      await axios.post('https://retailai-backend-0onv.onrender.com/inventory/restock', {
         product_id: item.product_id,
         quantity: parseInt(amount)
       })
       setRestockMsg('Stock updated for ' + productName)
-      const res = await axios.get('http://127.0.0.1:5000/inventory?shop_id=' + getShopId())
+      const res = await axios.get('https://retailai-backend-0onv.onrender.com/inventory?shop_id=' + getShopId())
       setInventory(res.data)
       setTimeout(function () { setRestockMsg('') }, 2500)
     } catch (error) {

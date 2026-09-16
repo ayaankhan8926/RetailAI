@@ -15,13 +15,13 @@ function Returns() {
   const [message, setMessage] = useState('')
 
   function loadReturns() {
-    axios.get('http://127.0.0.1:5000/returns?shop_id=' + getShopId()).then(function (res) { setReturns(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/returns?shop_id=' + getShopId()).then(function (res) { setReturns(res.data) })
   }
 
   useEffect(() => {
     loadReturns()
-    axios.get('http://127.0.0.1:5000/bills?shop_id=' + getShopId()).then(function (res) { setBills(res.data) })
-    axios.get('http://127.0.0.1:5000/products?shop_id=' + getShopId()).then(function (res) { setProducts(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/bills?shop_id=' + getShopId()).then(function (res) { setBills(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/products?shop_id=' + getShopId()).then(function (res) { setProducts(res.data) })
   }, [])
 
   const inputStyle = {
@@ -35,7 +35,7 @@ function Returns() {
       return
     }
     try {
-      await axios.post('http://127.0.0.1:5000/returns', {
+      await axios.post('https://retailai-backend-0onv.onrender.com/returns', {
         bill_id: parseInt(billId),
         product_id: parseInt(productId),
         type: type,

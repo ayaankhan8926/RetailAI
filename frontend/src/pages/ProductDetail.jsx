@@ -31,7 +31,7 @@ function ProductDetail() {
   const [applyImageToAllSizes, setApplyImageToAllSizes] = useState(true)
 
   function loadProduct() {
-    axios.get('http://127.0.0.1:5000/products?shop_id=' + getShopId()).then(function (res) {
+    axios.get('https://retailai-backend-0onv.onrender.com/products?shop_id=' + getShopId()).then(function (res) {
       setAllProducts(res.data)
       const found = res.data.find(function (p) { return p.product_id === parseInt(id) })
       setProduct(found)
@@ -90,7 +90,7 @@ function ProductDetail() {
   async function handleSaveEdit() {
     const finalImage = editImagePreview || editImageUrl || null
     try {
-      await axios.put('http://127.0.0.1:5000/products/' + product.product_id, {
+      await axios.put('https://retailai-backend-0onv.onrender.com/products/' + product.product_id, {
         product_name: editName,
         brand: editBrand,
         size: editSize,
@@ -110,7 +110,7 @@ function ProductDetail() {
         })
         for (let i = 0; i < sameColorSiblings.length; i++) {
           const sib = sameColorSiblings[i]
-          await axios.put('http://127.0.0.1:5000/products/' + sib.product_id, {
+          await axios.put('https://retailai-backend-0onv.onrender.com/products/' + sib.product_id, {
             product_name: sib.product_name,
             brand: sib.brand,
             size: sib.size,
@@ -135,7 +135,7 @@ function ProductDetail() {
 
   async function handleDeleteProduct() {
     try {
-      await axios.delete('http://127.0.0.1:5000/products/' + product.product_id)
+      await axios.delete('https://retailai-backend-0onv.onrender.com/products/' + product.product_id)
       navigate('/products')
     } catch (error) {
       const errMsg = error.response && error.response.data && error.response.data.error ? error.response.data.error : error.message

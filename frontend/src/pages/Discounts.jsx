@@ -13,12 +13,12 @@ function Discounts() {
   const [message, setMessage] = useState('')
 
   function loadDiscounts() {
-    axios.get('http://127.0.0.1:5000/discounts?shop_id=' + getShopId()).then(function (res) { setDiscounts(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/discounts?shop_id=' + getShopId()).then(function (res) { setDiscounts(res.data) })
   }
 
   useEffect(() => {
     loadDiscounts()
-    axios.get('http://127.0.0.1:5000/products?shop_id=' + getShopId()).then(function (res) { setProducts(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/products?shop_id=' + getShopId()).then(function (res) { setProducts(res.data) })
   }, [])
 
   const inputStyle = {
@@ -32,7 +32,7 @@ function Discounts() {
       return
     }
     try {
-      await axios.post('http://127.0.0.1:5000/discounts', {
+      await axios.post('https://retailai-backend-0onv.onrender.com/discounts', {
         product_id: productId ? parseInt(productId) : null,
         discount_type: discountType,
         discount_value: parseFloat(discountValue),

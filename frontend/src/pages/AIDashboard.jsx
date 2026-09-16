@@ -13,12 +13,12 @@ function AIDashboard() {
 
   useEffect(() => {
     const shopId = getShopId()
-    axios.get('http://127.0.0.1:5000/ai/best-seller?shop_id=' + shopId).then(function (res) { setBestSeller(res.data) })
-    axios.get('http://127.0.0.1:5000/ai/slow-moving?shop_id=' + shopId).then(function (res) { setSlowMoving(Array.isArray(res.data) ? res.data : []) })
-    axios.get('http://127.0.0.1:5000/ai/demand-prediction?shop_id=' + shopId).then(function (res) { setDemand(Array.isArray(res.data) ? res.data : []) })
-    axios.get('http://127.0.0.1:5000/ai/reorder-recommendation?shop_id=' + shopId).then(function (res) { setReorder(Array.isArray(res.data) ? res.data : []) })
-    axios.get('http://127.0.0.1:5000/ai/profit-prediction?shop_id=' + shopId).then(function (res) { setProfit(res.data) })
-    axios.get('http://127.0.0.1:5000/ai/customer-segmentation?shop_id=' + shopId).then(function (res) { setSegmentation(Array.isArray(res.data) ? res.data : []) })
+    axios.get('https://retailai-backend-0onv.onrender.com/ai/best-seller?shop_id=' + shopId).then(function (res) { setBestSeller(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/ai/slow-moving?shop_id=' + shopId).then(function (res) { setSlowMoving(Array.isArray(res.data) ? res.data : []) })
+    axios.get('https://retailai-backend-0onv.onrender.com/ai/demand-prediction?shop_id=' + shopId).then(function (res) { setDemand(Array.isArray(res.data) ? res.data : []) })
+    axios.get('https://retailai-backend-0onv.onrender.com/ai/reorder-recommendation?shop_id=' + shopId).then(function (res) { setReorder(Array.isArray(res.data) ? res.data : []) })
+    axios.get('https://retailai-backend-0onv.onrender.com/ai/profit-prediction?shop_id=' + shopId).then(function (res) { setProfit(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/ai/customer-segmentation?shop_id=' + shopId).then(function (res) { setSegmentation(Array.isArray(res.data) ? res.data : []) })
   }, [])
 
   const sectionStyle = {

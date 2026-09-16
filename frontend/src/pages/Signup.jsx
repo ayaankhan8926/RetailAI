@@ -15,7 +15,7 @@ function Signup({ onSignupSuccess }) {
     e.preventDefault()
     setError('')
     try {
-      const response = await axios.post('http://127.0.0.1:5000/shop/signup', {
+      const response = await axios.post('https://retailai-backend-0onv.onrender.com/shop/signup', {
         shop_name: shopName,
         owner_name: ownerName,
         owner_email: email,

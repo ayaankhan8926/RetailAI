@@ -13,7 +13,7 @@ function Employees() {
   const [message, setMessage] = useState('')
 
   function loadEmployees() {
-    axios.get('http://127.0.0.1:5000/employees?shop_id=' + getShopId()).then(function (res) { setEmployees(res.data) })
+    axios.get('https://retailai-backend-0onv.onrender.com/employees?shop_id=' + getShopId()).then(function (res) { setEmployees(res.data) })
   }
 
   useEffect(() => {
@@ -31,7 +31,7 @@ function Employees() {
       return
     }
     try {
-      await axios.post('http://127.0.0.1:5000/employees', {
+      await axios.post('https://retailai-backend-0onv.onrender.com/employees', {
         name: name,
         email: email,
         password: password,

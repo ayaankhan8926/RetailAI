@@ -23,7 +23,7 @@ function Products() {
   const navigate = useNavigate()
 
   function loadProducts() {
-    axios.get('http://127.0.0.1:5000/products?shop_id=' + getShopId())
+    axios.get('https://retailai-backend-0onv.onrender.com/products?shop_id=' + getShopId())
       .then(function (response) { setProducts(response.data) })
       .catch(function (error) { console.error('Error fetching products:', error) })
   }
@@ -59,7 +59,7 @@ function Products() {
 
     try {
       for (let i = 0; i < sizeList.length; i++) {
-        await axios.post('http://127.0.0.1:5000/products', {
+        await axios.post('https://retailai-backend-0onv.onrender.com/products', {
           product_name: newName,
           category_id: 1,
           brand: newBrand,

@@ -12,7 +12,7 @@ function Customers() {
   const [addMessage, setAddMessage] = useState('')
 
   function loadCustomers() {
-    axios.get('http://127.0.0.1:5000/customers?shop_id=' + getShopId())
+    axios.get('https://retailai-backend-0onv.onrender.com/customers?shop_id=' + getShopId())
       .then(function (response) { setCustomers(response.data) })
       .catch(function (error) { console.error('Error fetching customers:', error) })
   }
@@ -27,7 +27,7 @@ function Customers() {
       return
     }
     try {
-      await axios.post('http://127.0.0.1:5000/customers', {
+      await axios.post('https://retailai-backend-0onv.onrender.com/customers', {
         name: newName,
         phone: newPhone,
         email: newEmail,
