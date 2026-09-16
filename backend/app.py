@@ -24,7 +24,7 @@ def get_db_connection():
 def home():
     return "RetailAI Backend is running!"
 
-# ---------- PRODUCTS ----------
+# ---------- products ----------
 @app.route('/products', methods=['GET'])
 def get_products():
     shop_id = request.args.get('shop_id', 1)
@@ -32,8 +32,8 @@ def get_products():
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
         SELECT p.*, COALESCE(i.quantity, 0) AS stock_quantity, COALESCE(i.reorder_level, 5) AS reorder_level
-        FROM Products p
-        LEFT JOIN Inventory i ON p.product_id = i.product_id
+        FROM products p
+        LEFT JOIN inventory i ON p.product_id = i.product_id
         WHERE p.shop_id = %s
     """, (shop_id,))
     products = cursor.fetchall()
@@ -47,7 +47,7 @@ def add_product():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO Products (product_name, category_id, brand, size, color, cost_price, selling_price, supplier_id, shop_id, image_url)
+        INSERT INTO products (product_name, category_id, brand, size, color, cost_price, selling_price, supplier_id, shop_id, image_url)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
         data['product_name'], data['category_id'], data['brand'],
@@ -58,10 +58,10 @@ def add_product():
     new_id = cursor.lastrowid
     custom_barcode = data.get('barcode')
     barcode = custom_barcode if custom_barcode else ('890' + str(new_id).zfill(9))
-    cursor.execute("UPDATE Products SET barcode = %s WHERE product_id = %s", (barcode, new_id))
+    cursor.execute("UPDATE products SET barcode = %s WHERE product_id = %s", (barcode, new_id))
 
     cursor.execute("""
-        INSERT INTO Inventory (product_id, quantity, reorder_level)
+        INSERT INTO inventory (product_id, quantity, reorder_level)
         VALUES (%s, %s, %s)
     """, (new_id, 0, 5))
 
@@ -77,7 +77,7 @@ def update_product(product_id):
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            UPDATE Products SET
+            UPDATE products SET
                 product_name = %s, brand = %s, size = %s, color = %s,
                 cost_price = %s, selling_price = %s, image_url = %s, barcode = %s
             WHERE product_id = %s
@@ -99,7 +99,7 @@ def update_product(product_id):
 def get_product_by_barcode(barcode):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Products WHERE barcode = %s", (barcode,))
+    cursor.execute("SELECT * FROM products WHERE barcode = %s", (barcode,))
     product = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -114,7 +114,7 @@ def get_customers():
     shop_id = request.args.get('shop_id', 1)
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Customer WHERE shop_id = %s", (shop_id,))
+    cursor.execute("SELECT * FROM customer WHERE shop_id = %s", (shop_id,))
     customers = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -126,16 +126,16 @@ def add_customer():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO Customer (name, phone, email, address, shop_id)
+        INSERT INTO customer (name, phone, email, address, shop_id)
         VALUES (%s, %s, %s, %s, %s)
     """, (data['name'], data['phone'], data.get('email'), data.get('address'), data.get('shop_id', 1)))
     conn.commit()
     new_id = cursor.lastrowid
     cursor.close()
     conn.close()
-    return jsonify({"message": "Customer added successfully", "customer_id": new_id}), 201
+    return jsonify({"message": "customer added successfully", "customer_id": new_id}), 201
 
-# ---------- INVENTORY ----------
+# ---------- inventory ----------
 @app.route('/inventory', methods=['GET'])
 def get_inventory():
     shop_id = request.args.get('shop_id', 1)
@@ -144,8 +144,8 @@ def get_inventory():
     cursor.execute("""
         SELECT i.inventory_id, i.product_id, p.product_name, p.brand, p.size, p.color,
                i.quantity, i.reorder_level
-        FROM Inventory i
-        JOIN Products p ON i.product_id = p.product_id
+        FROM inventory i
+        JOIN products p ON i.product_id = p.product_id
         WHERE p.shop_id = %s
     """, (shop_id,))
     inventory = cursor.fetchall()
@@ -160,7 +160,7 @@ def restock_inventory():
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            UPDATE Inventory SET quantity = quantity + %s
+            UPDATE inventory SET quantity = quantity + %s
             WHERE product_id = %s
         """, (data['quantity'], data['product_id']))
         conn.commit()
@@ -172,13 +172,13 @@ def restock_inventory():
         cursor.close()
         conn.close()
 
-# ---------- ADMIN LOGIN ----------
+# ---------- admin LOGIN ----------
 @app.route('/admin/login', methods=['POST'])
 def admin_login():
     data = request.json
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Admin WHERE email = %s AND password = %s",
+    cursor.execute("SELECT * FROM admin WHERE email = %s AND password = %s",
                    (data['email'], data['password']))
     admin = cursor.fetchone()
     cursor.close()
@@ -193,13 +193,13 @@ def admin_login():
     else:
         return jsonify({"message": "Invalid email or password"}), 401
 
-# ---------- EMPLOYEE LOGIN ----------
+# ---------- employee LOGIN ----------
 @app.route('/employee/login', methods=['POST'])
 def employee_login():
     data = request.json
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Employee WHERE email = %s AND password = %s",
+    cursor.execute("SELECT * FROM employee WHERE email = %s AND password = %s",
                    (data['email'], data['password']))
     employee = cursor.fetchone()
     cursor.close()
@@ -215,13 +215,13 @@ def employee_login():
     else:
         return jsonify({"message": "Invalid email or password"}), 401
 
-# ---------- EMPLOYEE MANAGEMENT ----------
+# ---------- employee MANAGEMENT ----------
 @app.route('/employees', methods=['GET'])
 def get_employees():
     shop_id = request.args.get('shop_id', 1)
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT employee_id, name, email, phone, role, joining_date, status FROM Employee WHERE shop_id = %s", (shop_id,))
+    cursor.execute("SELECT employee_id, name, email, phone, role, joining_date, status FROM employee WHERE shop_id = %s", (shop_id,))
     employees = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -234,7 +234,7 @@ def add_employee():
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT INTO Employee (name, email, password, phone, role, joining_date, status, shop_id)
+            INSERT INTO employee (name, email, password, phone, role, joining_date, status, shop_id)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             data['name'], data['email'], data['password'], data['phone'],
@@ -242,7 +242,7 @@ def add_employee():
         ))
         conn.commit()
         new_id = cursor.lastrowid
-        return jsonify({"message": "Employee added successfully", "employee_id": new_id}), 201
+        return jsonify({"message": "employee added successfully", "employee_id": new_id}), 201
     except Exception as e:
         conn.rollback()
         return jsonify({"error": str(e)}), 400
@@ -250,7 +250,7 @@ def add_employee():
         cursor.close()
         conn.close()
 
-# ---------- SHOP SIGNUP ----------
+# ---------- shop SIGNUP ----------
 @app.route('/shop/signup', methods=['POST'])
 def shop_signup():
     data = request.json
@@ -258,24 +258,24 @@ def shop_signup():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        cursor.execute("SELECT * FROM Shop WHERE owner_email = %s", (data['owner_email'],))
+        cursor.execute("SELECT * FROM shop WHERE owner_email = %s", (data['owner_email'],))
         existing = cursor.fetchone()
         if existing:
             return jsonify({"message": "A shop with this email already exists"}), 400
 
         cursor.execute("""
-            INSERT INTO Shop (shop_name, owner_name, owner_email)
+            INSERT INTO shop (shop_name, owner_name, owner_email)
             VALUES (%s, %s, %s)
         """, (data['shop_name'], data['owner_name'], data['owner_email']))
         new_shop_id = cursor.lastrowid
 
         cursor.execute("""
-            INSERT INTO Admin (name, email, password, phone, shop_id)
+            INSERT INTO admin (name, email, password, phone, shop_id)
             VALUES (%s, %s, %s, %s, %s)
         """, (data['owner_name'], data['owner_email'], data['password'], data.get('phone', ''), new_shop_id))
 
         conn.commit()
-        return jsonify({"message": "Shop created successfully", "shop_id": new_shop_id}), 201
+        return jsonify({"message": "shop created successfully", "shop_id": new_shop_id}), 201
 
     except Exception as e:
         conn.rollback()
@@ -293,9 +293,9 @@ def get_bills():
     cursor.execute("""
         SELECT b.bill_id, c.name AS customer_name, e.name AS employee_name,
                b.bill_date, b.total_amount, b.payment_mode
-        FROM Bill b
-        LEFT JOIN Customer c ON b.customer_id = c.customer_id
-        LEFT JOIN Employee e ON b.employee_id = e.employee_id
+        FROM bill b
+        LEFT JOIN customer c ON b.customer_id = c.customer_id
+        LEFT JOIN employee e ON b.employee_id = e.employee_id
         WHERE b.shop_id = %s
     """, (shop_id,))
     bills = cursor.fetchall()
@@ -312,7 +312,7 @@ def create_bill():
     try:
         # Validate stock for every item BEFORE creating the bill
         for item in data['items']:
-            cursor.execute("SELECT quantity FROM Inventory WHERE product_id = %s", (item['product_id'],))
+            cursor.execute("SELECT quantity FROM inventory WHERE product_id = %s", (item['product_id'],))
             row = cursor.fetchone()
             available = row['quantity'] if row else 0
             if item['quantity'] > available:
@@ -320,7 +320,7 @@ def create_bill():
 
         cursor2 = conn.cursor()
         cursor2.execute("""
-            INSERT INTO Bill (customer_id, employee_id, subtotal, discount_amount, gst_amount, total_amount, payment_mode, shop_id)
+            INSERT INTO bill (customer_id, employee_id, subtotal, discount_amount, gst_amount, total_amount, payment_mode, shop_id)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             data['customer_id'], data['employee_id'], data['subtotal'],
@@ -331,17 +331,17 @@ def create_bill():
 
         for item in data['items']:
             cursor2.execute("""
-                INSERT INTO Sales (bill_id, product_id, quantity, price_at_sale)
+                INSERT INTO sales (bill_id, product_id, quantity, price_at_sale)
                 VALUES (%s, %s, %s, %s)
             """, (bill_id, item['product_id'], item['quantity'], item['price_at_sale']))
 
             cursor2.execute("""
-                UPDATE Inventory SET quantity = quantity - %s
+                UPDATE inventory SET quantity = quantity - %s
                 WHERE product_id = %s
             """, (item['quantity'], item['product_id']))
 
         conn.commit()
-        return jsonify({"message": "Bill created successfully", "bill_id": bill_id}), 201
+        return jsonify({"message": "bill created successfully", "bill_id": bill_id}), 201
 
     except Exception as e:
         conn.rollback()
@@ -359,8 +359,8 @@ def get_discounts():
     cursor.execute("""
         SELECT d.discount_id, p.product_name, d.discount_type, d.discount_value,
                d.start_date, d.end_date, d.status
-        FROM Discount d
-        LEFT JOIN Products p ON d.product_id = p.product_id
+        FROM discount d
+        LEFT JOIN products p ON d.product_id = p.product_id
         WHERE d.shop_id = %s
     """, (shop_id,))
     discounts = cursor.fetchall()
@@ -374,7 +374,7 @@ def add_discount():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO Discount (product_id, discount_type, discount_value, start_date, end_date, status, shop_id)
+        INSERT INTO discount (product_id, discount_type, discount_value, start_date, end_date, status, shop_id)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
     """, (
         data.get('product_id'), data['discount_type'], data['discount_value'],
@@ -384,7 +384,7 @@ def add_discount():
     new_id = cursor.lastrowid
     cursor.close()
     conn.close()
-    return jsonify({"message": "Discount added successfully", "discount_id": new_id}), 201
+    return jsonify({"message": "discount added successfully", "discount_id": new_id}), 201
 
 # ---------- RETURNS / EXCHANGE ----------
 @app.route('/returns', methods=['GET'])
@@ -395,9 +395,9 @@ def get_returns():
     cursor.execute("""
         SELECT r.return_id, r.bill_id, p1.product_name AS returned_product,
                p2.product_name AS exchanged_for, r.type, r.reason, r.refund_amount, r.return_date
-        FROM Return_Exchange r
-        LEFT JOIN Products p1 ON r.product_id = p1.product_id
-        LEFT JOIN Products p2 ON r.exchanged_product_id = p2.product_id
+        FROM return_exchange r
+        LEFT JOIN products p1 ON r.product_id = p1.product_id
+        LEFT JOIN products p2 ON r.exchanged_product_id = p2.product_id
         WHERE r.shop_id = %s
     """, (shop_id,))
     returns = cursor.fetchall()
@@ -413,7 +413,7 @@ def create_return():
 
     try:
         cursor.execute("""
-            INSERT INTO Return_Exchange (bill_id, product_id, type, exchanged_product_id, reason, refund_amount, shop_id)
+            INSERT INTO return_exchange (bill_id, product_id, type, exchanged_product_id, reason, refund_amount, shop_id)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (
             data['bill_id'], data['product_id'], data['type'],
@@ -421,13 +421,13 @@ def create_return():
         ))
 
         cursor.execute("""
-            UPDATE Inventory SET quantity = quantity + 1
+            UPDATE inventory SET quantity = quantity + 1
             WHERE product_id = %s
         """, (data['product_id'],))
 
         if data['type'] == 'Exchange' and data.get('exchanged_product_id'):
             cursor.execute("""
-                UPDATE Inventory SET quantity = quantity - 1
+                UPDATE inventory SET quantity = quantity - 1
                 WHERE product_id = %s
             """, (data['exchanged_product_id'],))
 
@@ -449,8 +449,8 @@ def best_seller():
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
         SELECT p.brand, p.color, p.size, s.quantity
-        FROM Sales s
-        JOIN Products p ON s.product_id = p.product_id
+        FROM sales s
+        JOIN products p ON s.product_id = p.product_id
         WHERE p.shop_id = %s
     """, (shop_id,))
     rows = cursor.fetchall()
@@ -473,7 +473,7 @@ def best_seller():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO AI_Prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
+    cursor.execute("INSERT INTO ai_prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
                    ('BestSeller', str(result), shop_id))
     conn.commit()
     cursor.close()
@@ -490,9 +490,9 @@ def slow_moving():
     cursor.execute("""
         SELECT p.product_id, p.product_name, p.brand, i.quantity AS stock_left,
                COALESCE(SUM(s.quantity), 0) AS total_sold
-        FROM Products p
-        JOIN Inventory i ON p.product_id = i.product_id
-        LEFT JOIN Sales s ON p.product_id = s.product_id
+        FROM products p
+        JOIN inventory i ON p.product_id = i.product_id
+        LEFT JOIN sales s ON p.product_id = s.product_id
         WHERE p.shop_id = %s
         GROUP BY p.product_id, p.product_name, p.brand, i.quantity
     """, (shop_id,))
@@ -509,7 +509,7 @@ def slow_moving():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO AI_Prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
+    cursor.execute("INSERT INTO ai_prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
                    ('SlowMoving', str(result), shop_id))
     conn.commit()
     cursor.close()
@@ -526,8 +526,8 @@ def demand_prediction():
     cursor.execute("""
         SELECT p.product_id, p.product_name, p.brand,
                s.quantity, s.sale_date
-        FROM Sales s
-        JOIN Products p ON s.product_id = p.product_id
+        FROM sales s
+        JOIN products p ON s.product_id = p.product_id
         WHERE p.shop_id = %s
     """, (shop_id,))
     rows = cursor.fetchall()
@@ -552,7 +552,7 @@ def demand_prediction():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO AI_Prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
+    cursor.execute("INSERT INTO ai_prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
                    ('Demand', str(result), shop_id))
     conn.commit()
     cursor.close()
@@ -570,16 +570,16 @@ def reorder_recommendation():
     cursor.execute("""
         SELECT p.product_id, p.product_name, p.brand,
                s.quantity, s.sale_date
-        FROM Sales s
-        JOIN Products p ON s.product_id = p.product_id
+        FROM sales s
+        JOIN products p ON s.product_id = p.product_id
         WHERE p.shop_id = %s
     """, (shop_id,))
     sales_rows = cursor.fetchall()
 
     cursor.execute("""
         SELECT i.product_id, i.quantity AS current_stock, i.reorder_level
-        FROM Inventory i
-        JOIN Products p ON i.product_id = p.product_id
+        FROM inventory i
+        JOIN products p ON i.product_id = p.product_id
         WHERE p.shop_id = %s
     """, (shop_id,))
     inventory_rows = cursor.fetchall()
@@ -618,7 +618,7 @@ def reorder_recommendation():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO AI_Prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
+    cursor.execute("INSERT INTO ai_prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
                    ('Reorder', str(result), shop_id))
     conn.commit()
     cursor.close()
@@ -634,8 +634,8 @@ def profit_prediction():
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
         SELECT s.quantity, s.price_at_sale, s.sale_date, p.cost_price
-        FROM Sales s
-        JOIN Products p ON s.product_id = p.product_id
+        FROM sales s
+        JOIN products p ON s.product_id = p.product_id
         WHERE p.shop_id = %s
     """, (shop_id,))
     rows = cursor.fetchall()
@@ -665,7 +665,7 @@ def profit_prediction():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO AI_Prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
+    cursor.execute("INSERT INTO ai_prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
                    ('Profit', str(result), shop_id))
     conn.commit()
     cursor.close()
@@ -673,7 +673,7 @@ def profit_prediction():
 
     return jsonify(result)
 
-# ---------- AI: CUSTOMER SEGMENTATION ----------
+# ---------- AI: customer SEGMENTATION ----------
 @app.route('/ai/customer-segmentation', methods=['GET'])
 def customer_segmentation():
     shop_id = request.args.get('shop_id', 1)
@@ -683,8 +683,8 @@ def customer_segmentation():
         SELECT b.customer_id, c.name,
                COUNT(b.bill_id) AS total_purchases,
                COALESCE(SUM(b.total_amount), 0) AS total_spent
-        FROM Bill b
-        JOIN Customer c ON b.customer_id = c.customer_id
+        FROM bill b
+        JOIN customer c ON b.customer_id = c.customer_id
         WHERE b.shop_id = %s
         GROUP BY b.customer_id, c.name
     """, (shop_id,))
@@ -709,12 +709,12 @@ def customer_segmentation():
     conn = get_db_connection()
     cursor = conn.cursor()
     for _, row in df.iterrows():
-        cursor.execute("UPDATE Customer SET segment = %s WHERE customer_id = %s",
+        cursor.execute("UPDATE customer SET segment = %s WHERE customer_id = %s",
                        (row['segment'], row['customer_id']))
     conn.commit()
 
     result = df[['customer_id', 'name', 'total_purchases', 'total_spent', 'segment']].to_dict(orient='records')
-    cursor.execute("INSERT INTO AI_Prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
+    cursor.execute("INSERT INTO ai_prediction (prediction_type, result_value, shop_id) VALUES (%s, %s, %s)",
                    ('Segmentation', str(result), shop_id))
     conn.commit()
     cursor.close()
@@ -727,8 +727,8 @@ def delete_product(product_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM Inventory WHERE product_id = %s", (product_id,))
-        cursor.execute("DELETE FROM Products WHERE product_id = %s", (product_id,))
+        cursor.execute("DELETE FROM inventory WHERE product_id = %s", (product_id,))
+        cursor.execute("DELETE FROM products WHERE product_id = %s", (product_id,))
         conn.commit()
         return jsonify({"message": "Product deleted successfully"}), 200
     except Exception as e:
