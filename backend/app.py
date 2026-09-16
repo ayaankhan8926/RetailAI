@@ -13,12 +13,13 @@ CORS(app)
 
 def get_db_connection():
     conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
         password=os.getenv("DB_PASSWORD"),
-        database="retailai_db"
+        database=os.getenv("DB_NAME", "retailai_db"),
+        port=int(os.getenv("DB_PORT", "3306"))
     )
-    return conn 
+    return conn
 @app.route('/')
 def home():
     return "RetailAI Backend is running!"
