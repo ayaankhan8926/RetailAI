@@ -266,8 +266,7 @@ function Products() {
                 }}
               >
                 <div style={{ width: '100%', height: '200px', overflow: 'hidden', background: '#EAE0CA' }}>
-                  <img
-                    src={first.image_url || 'https://images.pexels.com/photos/994523/pexels-photo-994523.jpeg?auto=compress&w=400'}
+                  <img loading="lazy" decoding="async" src={'https://retailai-backend-0onv.onrender.com/products/' + first.product_id + '/image'}
                     alt={first.product_name}
                     onError={handleImageError}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -298,3 +297,5 @@ function Products() {
 }
 
 export default Products
+
+

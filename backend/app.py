@@ -31,7 +31,7 @@ def get_products():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT p.*, COALESCE(i.quantity, 0) AS stock_quantity, COALESCE(i.reorder_level, 5) AS reorder_level
+        SELECT p.product_id, p.shop_id, p.product_name, p.category_id, p.brand, p.size, p.color, p.cost_price, p.selling_price, p.barcode, COALESCE(i.quantity, 0) AS stock_quantity, COALESCE(i.reorder_level, 5) AS reorder_level
         FROM products p
         LEFT JOIN inventory i ON p.product_id = i.product_id
         WHERE p.shop_id = %s
@@ -107,6 +107,18 @@ def get_product_by_barcode(barcode):
         return jsonify(product)
     else:
         return jsonify({"message": "Product not found"}), 404
+
+@app.route('/products/<int:product_id>/image', methods=['GET'])
+def get_product_image(product_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT image_url FROM products WHERE product_id = %s", (product_id,))
+    product = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if product and product.get('image_url'):
+        return jsonify({'image_url': product['image_url']})
+    return jsonify({'image_url': None}), 404
 
 # ---------- CUSTOMERS ----------
 @app.route('/customers', methods=['GET'])
@@ -740,3 +752,6 @@ def delete_product(product_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
